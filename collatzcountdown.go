@@ -1,0 +1,24 @@
+package piscine
+
+func CollatzCountdown(start int) int {
+	if start <= 0 {
+		return -1
+	}
+	steps := 0
+	for start != 1 {
+		if start%2 == 0 {
+			start = start / 2
+		} else {
+			start = (3 * start) + 1
+		}
+		steps++
+	}
+	return steps
+}
+
+/*
+func main() {
+	start := 100
+	countdown := CollatzCountdown(start)
+	fmt.Printf("Steps to reach 1 from %d: %d\n", start, countdown)
+}*/
