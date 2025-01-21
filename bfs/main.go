@@ -2,25 +2,45 @@ package main
 
 import "fmt"
 
-func main() {
-	graph := map[int][]int{
-		0: {0, 1},
-		1: {0, 2},
-		2: {1, 3},
-		3: {1, 4},
-		4: {2, 5},
-		5: {3, 6},
-		6: {4, 6},
-		7: {5, 6},
-	}
-	start := 0
-	target := 6
-	path := BFS(graph, start, target)
-	fmt.Printf("Shortest path from %d to %d: %v\n", start, target, path)
+// Graph structure
+type Graph struct {
+	Node map[int][]int
 }
 
+func main() {
+	g := NewGraph()
+	g.AddEdge(0, 1)
+	g.AddEdge(0, 2)
+	g.AddEdge(1, 3)
+	g.AddEdge(1, 4)
+	g.AddEdge(2, 5)
+	g.AddEdge(3, 6)
+	g.AddEdge(4, 6)
+	g.AddEdge(5, 6)
+
+	start := 0
+	target := 6
+	if path, found := g.BFS(start, target); found {
+		fmt.Printf("Shortest path from %d to %d: %v\n", start, target, path)
+	} else {
+		fmt.Printf("No path found from %d to %d\n", start, target)
+	}
+}
+
+// NewGraph creates a new graph
+func NewGraph() *Graph {
+	return &Graph{Node: make(map[int][]int)}
+}
+
+// AddEdge adds an edge to the graph
+func (g *Graph) AddEdge(v, w int) {
+	g.Node[v] = append(g.Node[v], w)
+	g.Node[w] = append(g.Node[w], v) // For undirected graph
+}
+
+
 // function to show implementation of bfs algorithm in go
-func BFS(graph map[int][]int, start int, end int) []int {
+func (g *Graph)BFS(start int, end int) ([]int, bool) {
 	visited := make(map[int]bool) // to mark the visited node
 	// queue to track the nodes
 	queue := []int{start}
@@ -35,10 +55,10 @@ func BFS(graph map[int][]int, start int, end int) []int {
 		queue = queue[1:]
 
 		if currentNode == end {
-			return Oder(paths, start, end)
+			return Oder(paths, start, end), true
 		}
 
-		for _, neighbor := range graph[currentNode] {
+		for _, neighbor := range g.Node[currentNode] {
 			if !visited[neighbor] {
 				visited[neighbor] = true
 				paths[neighbor] = currentNode // track the
@@ -47,7 +67,7 @@ func BFS(graph map[int][]int, start int, end int) []int {
 		}
 	}
 
-	return nil
+	return nil, false //no path found
 }
 
 // function to orderthe path from start to end
