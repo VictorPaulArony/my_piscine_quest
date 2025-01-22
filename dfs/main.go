@@ -19,38 +19,39 @@ func (g *Graph) AddNodes(x, y int) {
 }
 
 // function to perform the recusion to find all the posible paths
-func (g *Graph) DFS(start, target int, path []int, visited map[int]bool, allPath *[][]int) {
-	// mark the current node ass visted and add to path
-	visited[start] = true
-	path = append(path, start)
+func (g *Graph) DFS(start, target int) [][]int {
+	var path []int
+	visited := make(map[int]bool)
+	var allPaths [][]int
 
-	// if the cuurent node is the target save all the [paths]
-	if start == target {
-		// append a copy of the path to all the paths
-		newPath := make([]int, len(path))
-		copy(newPath, path)
-		*allPath = append(*allPath, newPath)
-	} else {
-		// loop recusively through all nodes
-		for _, neighbor := range g.Nodes[start] {
-			if !visited[neighbor] {
-				g.DFS(neighbor, target, path, visited, allPath)
+	// helper function to perform DFS recursively
+	var dfsHelper func(node int)
+	dfsHelper = func(node int) {
+		// mark the current node ass visted and add to path
+		visited[node] = true
+		path = append(path, node)
+
+		// if the cuurent node is the target save all the [paths]
+		if node == target {
+			// append a copy of the path to all the paths
+			newPath := make([]int, len(path))
+			copy(newPath, path)
+			allPaths = append(allPaths, newPath)
+		} else {
+			// loop recusively through all nodes
+			for _, neighbor := range g.Nodes[node] {
+				if !visited[neighbor] {
+					dfsHelper(neighbor)
+				}
 			}
 		}
+		// Backtrack: unmark the current node and remove it from the path
+		visited[node] = false
+		path = path[:len(path)-1]
 	}
-	// backtracking: remove curent node from the path
-	visited[start] = false
-	// path = path[:len(path)-1]
-}
+	dfsHelper(start)
 
-// function to find all paths DFS
-func (g *Graph) FindAllPaths(start, target int) [][]int {
-	var paths [][]int
-	var currentPath []int
-	visited := make(map[int]bool)
-
-	g.DFS(start, target, currentPath, visited, &paths)
-	return paths
+	return allPaths
 }
 
 func main() {
@@ -63,7 +64,7 @@ func main() {
 
 	start := 0
 	target := 4
-	paths := g.FindAllPaths(start, target)
+	paths := g.DFS(start, target)
 
 	fmt.Printf("All paths from %d to %d:\n", start, target)
 	for _, path := range paths {
