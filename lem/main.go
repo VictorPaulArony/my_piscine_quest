@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"log"
+	"math"
 	"os"
 	"strconv"
 	"strings"
@@ -27,9 +28,8 @@ type Graph struct {
 
 type Ant struct {
 	Id       int
-	Paths    []string
+	Path     int
 	Position int
-	Finished bool
 }
 
 // ReadFile reads the input file and constructs the graph structure.
@@ -135,7 +135,7 @@ func ReadFile(fileName string) *Graph {
 // function to fined the shortest path
 func FindPath(g *Graph, start, target string) [][]string {
 	paths := [][]string{}
-	currentPath := []string{}              // start from the starting room
+	currentPath := []string{}        // start from the starting room
 	visited := make(map[string]bool) // to avoid revisting the rooms
 
 	// define a helper function for the DFS
@@ -148,7 +148,7 @@ func FindPath(g *Graph, start, target string) [][]string {
 			newPath := make([]string, len(currentPath))
 			copy(newPath, currentPath)
 			paths = append(paths, newPath)
-		}else{
+		} else {
 			// Explore all linked rooms
 			for _, neighbor := range g.Room[node].Link {
 				if !visited[neighbor] {
@@ -166,70 +166,80 @@ func FindPath(g *Graph, start, target string) [][]string {
 }
 
 // function to move the ants in the rooms
-func MoveAnts(numAnts int, path []string, g *Graph) {
-	moves := []string{}
-	ants := make([]*Ant, numAnts)
-	for i := range ants {
-		// asign each ant the shortest path
-		ants[i] = &Ant{
-			Id:       i + 1,
-			Paths:    path,
-			Position: -1, // all ants start in the start room
+func MoveAnts(antDistribution [][]int, paths [][]string) {
+	// initialize ant position based on the distribution
+	var ants []Ant
+	for pathId, allAnts := range antDistribution {
+		for _, ant := range allAnts {
+			ants = append(ants, Ant{ant, pathId, 0})
 		}
 	}
-	currentAnt := 0
-	pathId := 0
-	for {
-		move := []string{}
-		allFinished := true
 
-		// Clear room occupancy
-		for _, room := range g.Room {
-			room.Visited = false
-		}
 
+	// simulate the movements until all ants reach end point
+	for len(ants) > 0 {
+		moves := []string{}
+		var allAnts []Ant
+		visited := make(map[string]bool)
 		for _, ant := range ants {
-			if ant.Finished {
-				continue
-			}
-			allFinished = false
+			if ant.Position < len(paths[ant.Path])-1 {
+				currentRoom := paths[ant.Path][ant.Position]
+				nextRoom := paths[ant.Path][ant.Position+1]
+				link := currentRoom + "-" + nextRoom
 
-			if ant.Position == -1 {
-				if currentAnt < numAnts {
-					ant.Paths = path[1:] // skip first room
-					pathId = (pathId + 1) % len(path)
-					ant.Position = 0
-					currentAnt++
-				}
-			}
-
-			if ant.Position >= 0 && ant.Position < len(ant.Paths) {
-				currentRoom := ant.Paths[ant.Position]
-				if !g.Room[currentRoom].Visited {
-					g.Room[currentRoom].Visited = true
-					move = append(move, fmt.Sprintf("L%d-%s", ant.Id, currentRoom))
-					ant.Position++
-					if ant.Position >= len(ant.Paths) {
-						ant.Finished = true
-					}
-
+				if !visited[link] {
+					moves = append(moves, fmt.Sprintf("L%d-%s", ant.Id, nextRoom))
+					allAnts = append(allAnts, Ant{ant.Id, ant.Path, ant.Position + 1})
+					visited[link] = true
+				} else {
+					// othewise keep the ant in its currect position
+					allAnts = append(allAnts, ant)
 				}
 			}
 		}
-
-		if len(move) > 0 {
-			moves = append(moves, strings.Join(move, " "))
+		// print moves for the current turn
+		if len(moves) > 0 {
+			fmt.Println(strings.Join(moves, " "))
 		}
+		// update position for the next turn
+		ants = allAnts
+		
+	}
+}
 
-		if allFinished {
-			break
+// function that place the ants in the paths optimamlly
+func AntPlacer(paths [][]string, numAnts int) [][]int {
+	// initialize an array to hold the distribution of ants across the paths
+	distribution := make([][]int, len(paths))
+
+	// calculate the length of each path excluding the start node
+	pathLengths := make([]int, len(paths))
+	for i, path := range paths {
+		pathLengths[i] = len(path) - 1
+		// the length of the path is number of m=nodes minus one
+	}
+
+	// iterate through each ant to assign them to the paths
+	for ant := 1; ant <= numAnts; ant++ {
+		bestPath := 0 // path with the shortest arival time
+		bestTime := math.MaxInt64//
+
+		// iterate through all the paths to determine the shortest
+		for i:= range paths {
+			// calc the arival time for this path
+			// current ants on the path = len(distrbution[i])
+			arivalTime := len(distribution[i]) + pathLengths[i]
+			// updating the best path if the path arrival time is shorter
+			if arivalTime < bestTime {
+				bestPath = i
+				bestTime = arivalTime
+			}
 		}
-
+		// assign the ants to the best path by appending it to thr corresponding distribution slice
+		distribution[bestPath] = append(distribution[bestPath], ant)
 	}
-	for _, move := range moves {
-		fmt.Println(move)
-		continue
-	}
+	fmt.Println(distribution)
+	return distribution
 }
 
 // main function to execute the program
@@ -246,5 +256,6 @@ func main() {
 	fmt.Println("Shortest path from start to end:")
 	fmt.Println(path)
 
-	MoveAnts(graph.AntCount, path[0], graph)
+	antCount := AntPlacer(path, graph.AntCount)
+	MoveAnts(antCount, path)
 }
