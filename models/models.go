@@ -4,11 +4,12 @@ package models
 
 type Colony struct {
 	NoOfAnts int
-	Rooms *[]Room
+	Rooms []*Room
+	
 }
 
 type Room struct{
 	Name string
-	Coordinates map[string][]int
-	Link map[string]int
+	HouseAndCoordinates map[string][]int
+	Link map[string]string
 }
