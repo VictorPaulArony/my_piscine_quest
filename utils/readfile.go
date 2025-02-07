@@ -6,141 +6,137 @@ import (
 	"os"
 	"strconv"
 	"strings"
-
-	"lem-in/models"
 )
 
-// reading the .txt file
-// using either BFS/DFS to get the best path and all paths
-// sort the best path from the search
-// deploy the ants to the paths
-// show/print/simulate the ants in the paths
-// end
+type Room struct {
+	RoomName string
+	X, Y     int
+	Links    []string
+}
 
-func FileReader(path string) *models.Colony {
+type Graph struct {
+	TotalAnts int
+	Rooms     map[string]*Room
+	Start     Room
+	End       Room
+}
 
-	var rooms []*models.Room
-	var links map[string]string = make(map[string]string)
-	var noOfAnts int
-	
-
-	file, err := os.Open(path)
+// function to read the .txt file to get the data
+func ReadFile(fileName string) (*Graph, error) {
+	// read the file to get the graph details
+	file, err := os.Open(fileName)
 	if err != nil {
-		log.Println("Error opening the data file \n", err)
-		return nil
+		log.Println("Error while reding the file", err)
+		return nil, err
 	}
+
+	// close the file after the reading is complete
 	defer file.Close()
 
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		text := scanner.Text()
+	// initialize the graph to store the data
+	graph := IntializeGraph()
 
-		// capture the number of ants
-		ants := CheckNoOfAnts(text) //update this in the colony no of ants
-		if ants > 0 {
-			noOfAnts = ants
+	// scan through the file to populate the graph with the file data
+	scanner := bufio.NewScanner(file)
+	// check if the file is an empty file
+	if !scanner.Scan() {
+		log.Println("The file provided is empty")
+		return nil, err
+	}
+
+	ants, err := strconv.Atoi(scanner.Text())
+	if err != nil {
+		log.Println("Error while converting string to num for ants: ", err)
+		return nil, err
+	}
+
+	// update the number of ants to the graph
+	graph.TotalAnts = ants
+
+	start := false
+	end := false
+	for scanner.Scan() {
+		line := scanner.Text()
+
+		if line == "" {
 			continue
 		}
 
-		//Capture the rooms
-		singleRoom := MapRooms(text)
-		if singleRoom != nil {
-			rooms = append(rooms, singleRoom) // update this on the colony as slice of rooms
+		// check for the start and end of the file rooms
+		if line == "##start" {
+			start = true
+		} else if line == "##end" {
+			end = true
 		}
 
-		newLinks := CheckForLinks(text)
-		for k, v := range newLinks{
-			links[k] = v
+		if strings.HasPrefix(line, "#") {
+			continue // Skip comments
 		}
-	}
 
-	//Assigning the links to their respective rooms
-	for _, room := range rooms {
-		if link, found := links[room.Name]; found {
-			room.Link = map[string]string{room.Name: link}
+		// poputate the roooms and their cooordinates
+		if strings.Contains(line, " ") {
+			roomDetails := strings.Fields(line)
+
+			roomName := roomDetails[0]
+
+			// x and y coordinates for the rooms
+			x, err1 := strconv.Atoi(roomDetails[1])
+			y, err2 := strconv.Atoi(roomDetails[2])
+			if err1 != nil || err2 != nil {
+				log.Println("Error while converting string to num for x and y: ", err)
+				return nil, err
+			}
+
+			room := &Room{
+				RoomName: roomName,
+				X:        x,
+				Y:        y,
+			}
+
+			// populate the start and the end of the rooms to the graph
+			if start {
+				graph.Start = *room
+				start = false
+			} else if end {
+				graph.End = *room
+				end = false
+			}
+
+			// populate the room to the map of the rooms
+			graph.Rooms[roomName] = room
+
+			// going to the rooms and their links within the tunnel
+
+		} else if strings.Contains(line, "-") {
+			parts := strings.Split(line, "-")
+			if len(parts) != 2 {
+				log.Println("Error invalid room links format")
+				return nil, err
+			}
+			// fmt.Printf("%q \n",parts[1])
+
+			// Check if the rooms in the links are in the map of all the rooms
+			room1, exist1 := graph.Rooms[parts[0]]
+			room2, exist2 := graph.Rooms[parts[1]]
+
+			if !exist1 || !exist2 {
+				log.Println("The links provided does not exist")
+				return nil, err
+			}
+			room1.Links = append(room1.Links, parts[1])
+			room2.Links = append(room2.Links, parts[0])
+
 		}
+
 	}
 
-	colony := &models.Colony{
-		NoOfAnts: noOfAnts,
-		Rooms: rooms,
-	}
-
-	return colony
+	return graph, nil
 }
 
-// This function checks for single numbers and treats them as the number of ants.
-func CheckNoOfAnts(text string) int {
-
-	if strings.Contains(text, "-") || strings.HasPrefix(text, "##"){
-		return 0
+// function to initialize the Graph
+func IntializeGraph() *Graph {
+	return &Graph{
+		TotalAnts: 0,
+		Rooms:     make(map[string]*Room),
 	}
-
-	splitted := strings.Split(text, " ")
-	if len(splitted) == 1 {
-		ants, err := strconv.Atoi(splitted[0])
-		if err != nil {
-			log.Println("Error coneverting No of ants.\n", err)
-			return 0
-		}
-		return ants
-	}
-
-	return 0
-}
-
-// if the length of a text is 3 after splitting with a space
-// we get that as a room and the coordinates
-func MapRooms(text string) *models.Room {
-	if strings.Contains(text, "-") || strings.HasPrefix(text, "##"){
-		return nil
-	}
-
-	houseAndCoordinates := make(map[string][]int)
-	var roomName string
-	var coordinates []int
-
-	splitted := strings.Split(text, " ")
-	if len(splitted) == 3 {
-		roomName = splitted[0]
-	}
-	x , err:= strconv.Atoi(splitted[1])
-	 if err != nil {
-		log.Println("Error converting x coordiante")
-		return nil
-	 }
-	 y, err := strconv.Atoi(splitted[2])
-	 if err != nil {
-		log.Println("Error converting y coordiante")
-		return nil
-	 }
-	coordinates = append(coordinates, x, y)
-
-	houseAndCoordinates[roomName] = coordinates
-
-	room := &models.Room{
-		Name: roomName,
-		HouseAndCoordinates: houseAndCoordinates,
-	}
-
-	return room
-}
-
-// If the value of a particular line is separated by (-)
-// we get them as a link to a house
-
-func CheckForLinks(text string) map[string]string {
-	roomLink := make(map[string]string)
-
-	var splitted []string
-	if strings.Contains(text, "-") {
-		splitted = strings.Split(text, "-")
-		if len(splitted) == 2 {
-			roomLink[splitted[0]] = splitted[1]
-		}
-	}
-
-
-
-	return roomLink
 }
