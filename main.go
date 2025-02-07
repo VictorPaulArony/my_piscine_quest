@@ -38,7 +38,6 @@ func main() {
 		return
 	}
 
-	var room *Room
 	var colony Colony
 	var startRoom, endRoom, antCount int
 	var connectionFrom, connectionTo, roomPosition, xCoordinate, yCoordinate int
@@ -49,6 +48,7 @@ func main() {
 
 	var fileContent [][]string
 	for scanner.Scan() {
+		var room Room
 		lineContent := scanner.Text()
 
 		if len(lineContent) == 0 || string(lineContent[0]) == " " {
@@ -69,11 +69,11 @@ func main() {
 			xCoordinate, _ = strconv.Atoi(roomDetails[1])
 			yCoordinate, _ = strconv.Atoi(roomDetails[2])
 
-			room = &Room{
+			room = Room{
 				RoomNumber: roomPosition,
 				Coordinate: []int{xCoordinate, yCoordinate},
 			}
-			colony.Rooms[roomPosition] = room
+			colony.Rooms[roomPosition] = &room
 
 		} else if strings.Contains(lineContent, "-") {
 
@@ -94,7 +94,7 @@ func main() {
 
 		_, exists1 := colony.Rooms[endRoom]
 		if exists1 && isEnd {
-			colony.End = room
+			colony.End = &room
 			isEnd = false
 		}
 
