@@ -18,11 +18,13 @@ import (
 // end
 
 func FileReader(path string) *models.Colony {
-
 	var rooms []*models.Room
-	var links map[string]string = make(map[string]string)
+	var allLinks [][]string
 	var noOfAnts int
-	
+
+	// Starting and ending coordinates
+	var startCoord []int
+	var endCoord []int
 
 	file, err := os.Open(path)
 	if err != nil {
@@ -31,39 +33,66 @@ func FileReader(path string) *models.Colony {
 	}
 	defer file.Close()
 
+	var isStart, isEnd bool // Checks the first and end coordinates respectively
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		text := scanner.Text()
 
+		if text == "##start" {
+			isStart = true
+			continue
+		}
+		if text == "##end" {
+			isEnd = true
+			continue
+		}
+
+		// Ignore any other instance of another #
+		if strings.Contains(text, "#") {
+			continue
+		}
+
 		// capture the number of ants
-		ants := CheckNoOfAnts(text) //update this in the colony no of ants
+		ants := CheckNoOfAnts(text) // update this in the colony no of ants
 		if ants > 0 {
 			noOfAnts = ants
 			continue
 		}
 
-		//Capture the rooms
+		if isStart {
+			startRoom := MapRooms(text)
+			isStart = false
+			// Add only the coordinates in the colony
+			for _, v := range startRoom.HouseAndCoordinates {
+				startCoord = v
+			}
+		} else if isEnd {
+			endRoom := MapRooms(text)
+			isEnd = false
+			// Add only the coordinates in the colony
+			for _, v := range endRoom.HouseAndCoordinates {
+				endCoord = v
+			}
+		}
+		// Capture the rooms
 		singleRoom := MapRooms(text)
 		if singleRoom != nil {
 			rooms = append(rooms, singleRoom) // update this on the colony as slice of rooms
 		}
-
-		newLinks := CheckForLinks(text)
-		for k, v := range newLinks{
-			links[k] = v
+		// Capture links
+		if strings.Contains(text, "-") {
+			links := CheckForLinks(text)
+			allLinks = append(allLinks, links)
 		}
 	}
 
-	//Assigning the links to their respective rooms
-	for _, room := range rooms {
-		if link, found := links[room.Name]; found {
-			room.Link = map[string]string{room.Name: link}
-		}
-	}
-
+	// Updating the colony struct
 	colony := &models.Colony{
-		NoOfAnts: noOfAnts,
-		Rooms: rooms,
+		NoOfAnts:  noOfAnts,
+		Rooms:     rooms,
+		Link:      allLinks,
+		StartRoom: startCoord,
+		EndRoom:   endCoord,
 	}
 
 	return colony
@@ -71,8 +100,7 @@ func FileReader(path string) *models.Colony {
 
 // This function checks for single numbers and treats them as the number of ants.
 func CheckNoOfAnts(text string) int {
-
-	if strings.Contains(text, "-") || strings.HasPrefix(text, "##"){
+	if strings.Contains(text, "-") || strings.HasPrefix(text, "##") {
 		return 0
 	}
 
@@ -92,34 +120,34 @@ func CheckNoOfAnts(text string) int {
 // if the length of a text is 3 after splitting with a space
 // we get that as a room and the coordinates
 func MapRooms(text string) *models.Room {
-	if strings.Contains(text, "-") || strings.HasPrefix(text, "##"){
+	if strings.Contains(text, "-") || strings.HasPrefix(text, "##") {
 		return nil
 	}
-
 	houseAndCoordinates := make(map[string][]int)
 	var roomName string
 	var coordinates []int
 
 	splitted := strings.Split(text, " ")
+
 	if len(splitted) == 3 {
 		roomName = splitted[0]
 	}
-	x , err:= strconv.Atoi(splitted[1])
-	 if err != nil {
+	x, err := strconv.Atoi(splitted[1])
+	if err != nil {
 		log.Println("Error converting x coordiante")
 		return nil
-	 }
-	 y, err := strconv.Atoi(splitted[2])
-	 if err != nil {
+	}
+	y, err := strconv.Atoi(splitted[2])
+	if err != nil {
 		log.Println("Error converting y coordiante")
 		return nil
-	 }
+	}
 	coordinates = append(coordinates, x, y)
 
 	houseAndCoordinates[roomName] = coordinates
 
 	room := &models.Room{
-		Name: roomName,
+		Name:                roomName,
 		HouseAndCoordinates: houseAndCoordinates,
 	}
 
@@ -129,18 +157,16 @@ func MapRooms(text string) *models.Room {
 // If the value of a particular line is separated by (-)
 // we get them as a link to a house
 
-func CheckForLinks(text string) map[string]string {
-	roomLink := make(map[string]string)
+func CheckForLinks(text string) []string {
+	var roomLinks []string
 
-	var splitted []string
-	if strings.Contains(text, "-") {
-		splitted = strings.Split(text, "-")
-		if len(splitted) == 2 {
-			roomLink[splitted[0]] = splitted[1]
-		}
+	splitted := strings.Split(text, "-")
+	if len(splitted) == 2 {
+		roomLinks = (splitted)
+	} else {
+		log.Println("Invalid input")
+		return nil
 	}
 
-
-
-	return roomLink
+	return roomLinks
 }
