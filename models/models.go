@@ -8,6 +8,7 @@ type Colony struct {
 	Link [][]string // This stores connections of room to another room
 	StartRoom []int
 	EndRoom []int
+	RoomAndLinks map[string][]string
 }
 
 type Room struct{

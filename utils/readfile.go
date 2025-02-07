@@ -2,6 +2,7 @@ package utils
 
 import (
 	"bufio"
+	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -20,6 +21,7 @@ import (
 func FileReader(path string) *models.Colony {
 	var rooms []*models.Room
 	var allLinks [][]string
+	var roomAndLinks map[string][]string
 	var noOfAnts int
 
 	// Starting and ending coordinates
@@ -86,6 +88,9 @@ func FileReader(path string) *models.Colony {
 		}
 	}
 
+	roomAndLinks = FindRoomAndLinks(allLinks)
+	fmt.Println("<<<>>>", roomAndLinks)
+
 	// Updating the colony struct
 	colony := &models.Colony{
 		NoOfAnts:  noOfAnts,
@@ -93,6 +98,7 @@ func FileReader(path string) *models.Colony {
 		Link:      allLinks,
 		StartRoom: startCoord,
 		EndRoom:   endCoord,
+		RoomAndLinks: roomAndLinks,
 	}
 
 	return colony
@@ -169,4 +175,15 @@ func CheckForLinks(text string) []string {
 	}
 
 	return roomLinks
+}
+
+// The rooms and the links that are connected to the room
+func FindRoomAndLinks(c [][]string) map[string][]string {
+	var roomAndLinks = make(map[string][]string)
+	for _, room := range c{
+		roomAndLinks[room[0]] = append(roomAndLinks[room[0]], room[1])
+		roomAndLinks[room[1]] = append(roomAndLinks[room[1]], room[0])
+	}
+
+	return roomAndLinks
 }
