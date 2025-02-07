@@ -2,31 +2,32 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"os"
+
 	"lem-in/utils"
 )
 
 func main() {
-
-	// reading the file
-	colony := utils.FileReader("test0.txt")
-
-	fmt.Println("number_of_ants ", colony.NoOfAnts)
-	rooms := colony.Rooms
-
-	fmt.Print("the_rooms\n")
-	var x, y int
-	for _, room := range rooms{
-		for _, v := range room.HouseAndCoordinates {
-			x = v[0]
-			y = v[1]
-		}
-		fmt.Println(room.Name, x, y)
+	if len(os.Args) != 2 {
+		fmt.Println("Usage: go run . <filename>")
+		return
 	}
-	
-	fmt.Print("the_links\n")
-	for _, room := range rooms {
-		for k, v := range room.Link{
-			fmt.Printf("%s-%s\n", k, v)
-		}
+
+	fileName := os.Args[1]
+	// g := utils.IntializeGraph()
+
+	graph, err := utils.ReadFile(fileName)
+	if err != nil {
+		log.Println("Error in Reading file function")
+		return
 	}
+	fmt.Printf("Total ants: %d\n", graph.TotalAnts)
+
+	for _, rooms := range graph.Rooms {
+		fmt.Printf("{ %s } links { %s } \n", rooms.RoomName, rooms.Links)
+	}
+
+	allpaths := graph.FindPaths(graph.Start.RoomName, graph.End.RoomName)
+	fmt.Println(allpaths)
 }
