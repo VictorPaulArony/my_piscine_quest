@@ -6,19 +6,9 @@ import (
 	"os"
 	"strconv"
 	"strings"
-)
 
-type Room struct {
-	RoomNumber int
-	Coordinate []int
-	Connection []int
-}
-type Colony struct {
-	NumAnts int
-	Rooms   map[int]*Room
-	Start   *Room
-	End     *Room
-}
+	"lemin/models"
+)
 
 func main() {
 	args := os.Args[1:]
@@ -37,18 +27,19 @@ func main() {
 		fmt.Println("Error in opening file")
 		return
 	}
+	defer file.Close()
 
-	var colony Colony
+	var colony models.Colony
 	var startRoom, endRoom, antCount int
 	var connectionFrom, connectionTo, roomPosition, xCoordinate, yCoordinate int
 	var isEnd bool
 
-	colony.Rooms = make(map[int]*Room)
+	colony.Rooms = make(map[int]*models.Room)
 	scanner := bufio.NewScanner(file)
 
 	var fileContent [][]string
 	for scanner.Scan() {
-		var room Room
+		var room models.Room
 		lineContent := scanner.Text()
 
 		if len(lineContent) == 0 || string(lineContent[0]) == " " {
@@ -69,7 +60,7 @@ func main() {
 			xCoordinate, _ = strconv.Atoi(roomDetails[1])
 			yCoordinate, _ = strconv.Atoi(roomDetails[2])
 
-			room = Room{
+			room = models.Room{
 				RoomNumber: roomPosition,
 				Coordinate: []int{xCoordinate, yCoordinate},
 			}
@@ -94,7 +85,7 @@ func main() {
 
 		_, exists1 := colony.Rooms[endRoom]
 		if exists1 && isEnd {
-			colony.End = &room
+			colony.End =  &room
 			isEnd = false
 		}
 
@@ -103,4 +94,10 @@ func main() {
 	startRoom, _ = strconv.Atoi(fileContent[1][0])
 	colony.Start = colony.Rooms[startRoom]
 	fmt.Println(colony)
+
+	for _,rooms:= range colony.Rooms{
+		fmt.Println(rooms)
+	}
+
+	fmt.Println(colony.Bfs())
 }
