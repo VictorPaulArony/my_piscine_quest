@@ -42,26 +42,24 @@ func main() {
 	var colony Colony
 	var startRoom, endRoom, antCount int
 	var connectionFrom, connectionTo, roomPosition, xCoordinate, yCoordinate int
-	var  isEnd bool
+	var isEnd bool
 
 	colony.Rooms = make(map[int]*Room)
 	scanner := bufio.NewScanner(file)
-	
-    var fileContent [][]string
+
+	var fileContent [][]string
 	for scanner.Scan() {
 		lineContent := scanner.Text()
 
 		if strings.Contains(lineContent, "##start") {
-			fileContent=append(fileContent, []string{"start"})
-			
-			
+			fileContent = append(fileContent, []string{"start"})
+
 		} else if strings.Contains(lineContent, "##end") {
 			isEnd = true
-		
 
 		} else if strings.Contains(lineContent, " ") {
 			roomDetails := strings.Split(lineContent, " ")
-			fileContent=append(fileContent, roomDetails)
+			fileContent = append(fileContent, roomDetails)
 			roomPosition, _ = strconv.Atoi(roomDetails[0])
 			xCoordinate, _ = strconv.Atoi(roomDetails[1])
 			yCoordinate, _ = strconv.Atoi(roomDetails[2])
@@ -88,16 +86,16 @@ func main() {
 		} else {
 			antCount, _ = strconv.Atoi(lineContent)
 		}
-		
+
 		_, exists1 := colony.Rooms[endRoom]
 		if exists1 && isEnd {
 			colony.End = room
 			isEnd = false
 		}
-		
+
 		colony.NumAnts = antCount
 	}
-	startRoom,_=strconv.Atoi(fileContent[1][0])
-	colony.Start=colony.Rooms[startRoom]
+	startRoom, _ = strconv.Atoi(fileContent[1][0])
+	colony.Start = colony.Rooms[startRoom]
 	fmt.Println(colony)
 }
