@@ -27,7 +27,7 @@ func main() {
 		fmt.Println("Only one input-text file name needed")
 		return
 	}
-	if !strings.HasSuffix(args[0], "txt") {
+	if !strings.HasSuffix(args[0], ".txt") {
 		fmt.Println("the file given must be a .txt file")
 		return
 	}
@@ -51,12 +51,17 @@ func main() {
 	for scanner.Scan() {
 		lineContent := scanner.Text()
 
-		if strings.Contains(lineContent, "##start") {
-			fileContent = append(fileContent, []string{"start"})
-
-		} else if strings.Contains(lineContent, "##end") {
-			isEnd = true
-
+		if len(lineContent) == 0 || string(lineContent[0]) == " " {
+			continue
+		}
+		if strings.HasPrefix(lineContent, "#") {
+			if strings.Contains(lineContent, "##start") {
+				fileContent = append(fileContent, []string{"start"})
+			} else if strings.Contains(lineContent, "##end") {
+				isEnd = true
+			} else {
+				continue
+			}
 		} else if strings.Contains(lineContent, " ") {
 			roomDetails := strings.Split(lineContent, " ")
 			fileContent = append(fileContent, roomDetails)
