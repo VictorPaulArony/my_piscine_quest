@@ -1,5 +1,7 @@
 package models
 
+import "fmt"
+
 type Room struct {
 	RoomNumber int
 	Coordinate []int
@@ -12,9 +14,8 @@ type Colony struct {
 	End     *Room
 }
 
-func (c *Colony) Bfs() []int {
-	visited := []int{}
-	toBeVisited := []int{}
+func (c *Colony) Bfs() [][]int {
+	toBeVisited := [][]int{}
 
 	startPtr := c.Start
 	endPtr := c.End
@@ -23,34 +24,33 @@ func (c *Colony) Bfs() []int {
 
 	startRoom := startValue.RoomNumber
 	endRoom := targetValue.RoomNumber
+	var visitedRooms []int
+	visitedRooms = append(visitedRooms, startRoom)
 
-	toBeVisited = append(toBeVisited, startRoom)
-
-	hasBeenVisited := make([]bool, len(c.Rooms))
-	for len(toBeVisited) != 0 {
-
-		if len(visited) > 0 && visited[len(visited)-1] == endRoom {
-			break
+	for len(visitedRooms) != 0 {
+		currentRoom := visitedRooms[len(visitedRooms)-1]
+		
+		if currentRoom == endRoom {
+			fmt.Println(toBeVisited)
+			
 		}
 
-		visitedVertex := toBeVisited[0]
-		for _, rooms := range c.Rooms {
-			if rooms.RoomNumber == visitedVertex {
-				visited = append(visited, visitedVertex)
-				hasBeenVisited[visitedVertex] = true
-				for _, connection := range rooms.Connection {
-					if !hasBeenVisited[connection] {
-						toBeVisited = append(toBeVisited, connection)
-						toBeVisited = toBeVisited[1:]
+		hasBeenVisited := make(map[int]bool)
+		visitedVertex := visitedRooms[len(visitedRooms)-1]
 
-					}
+		if _, exists := c.Rooms[visitedVertex]; exists {
+			hasBeenVisited[visitedVertex] = true
+			for _, connection := range c.Rooms[visitedVertex].Connection {
+				if !hasBeenVisited[connection] {
+					visitedRooms = append(visitedRooms, visitedVertex, connection)
+					fmt.Println(visitedRooms)
+					toBeVisited = append(toBeVisited, visitedRooms)
+					toBeVisited = toBeVisited[1:]
 				}
-
 			}
 		}
 	}
-
-	return visited
+	return toBeVisited
 }
 
 func (c *Colony) Dfs() []int {
@@ -66,27 +66,27 @@ func (c *Colony) Dfs() []int {
 	endRoom := targetValue.RoomNumber
 
 	toBeVisited = append(toBeVisited, startRoom)
-
 	hasBeenVisited := make([]bool, len(c.Rooms))
+
 	for len(toBeVisited) != 0 {
 		if len(visited) > 0 && visited[len(visited)-1] == endRoom {
 			break
 		}
-
 		visitedVertex := toBeVisited[0]
 		for _, rooms := range c.Rooms {
 			if rooms.RoomNumber == visitedVertex {
+				hasBeenVisited[visitedVertex] = true
 				for _, connection := range rooms.Connection {
 					if !hasBeenVisited[connection] {
-						visited = append(visited, toBeVisited[len(toBeVisited)-1])
-						hasBeenVisited[visitedVertex] = true
-						toBeVisited = toBeVisited[:len(toBeVisited)-1]
+						visited = append(visited, connection)
 						toBeVisited = append(toBeVisited, connection)
+						toBeVisited = toBeVisited[1:]
 
 					}
 				}
 			}
 		}
 	}
+
 	return visited
 }

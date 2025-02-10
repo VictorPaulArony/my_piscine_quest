@@ -93,7 +93,11 @@ func main() {
 	}
 	startRoom, _ = strconv.Atoi(fileContent[1][0])
 	colony.Start = colony.Rooms[startRoom]
-	fmt.Println(colony)
+
+	// for _,rooms:=range colony.Rooms{
+	// 	fmt.Println(rooms)
+
+	// }
 	
 	fmt.Println(colony.Bfs())
 	fmt.Println(colony.Dfs())
