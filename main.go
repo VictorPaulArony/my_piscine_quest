@@ -2,11 +2,34 @@ package main
 
 import (
 	"fmt"
+
 	"lem-in/utils"
 )
 
-func main() {
+func areSlicesEqual(a, b []int) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
+}
 
+func findKeyForSlice(myMap map[string][]int, targetSlice []int) (string, bool) {
+	// fmt.Printf("%v compared aganist %v\n", myMap, targetSlice)
+	for key, slice := range myMap {
+		// fmt.Printf("Key %s Value %v\n", key, slice)
+		if areSlicesEqual(slice, targetSlice) {
+			return key, true
+		}
+	}
+	return "", false
+}
+
+func main() {
 	// reading the file
 	colony := utils.FileReader("test0.txt")
 
@@ -19,7 +42,7 @@ func main() {
 	rooms := colony.Rooms
 	fmt.Print("the_rooms\n")
 	var x, y int
-	for _, room := range rooms{
+	for _, room := range rooms {
 		for _, v := range room.HouseAndCoordinates {
 			x = v[0]
 			y = v[1]
@@ -29,11 +52,49 @@ func main() {
 
 	// All the links that are available for the rooms.
 	fmt.Print("the_links\n")
-	for _, room := range colony.Link{
+	for _, room := range colony.Link {
 		fmt.Printf("%s-%s\n", room[0], room[1])
 	}
-	
+
 	roomAndLinks := colony.RoomAndLinks
 
 	fmt.Println(roomAndLinks)
+
+	// The BFS shortest path
+
+	my := make(map[string][]int)
+	var startkey string
+	var endkey string
+	roomsAndCoord := colony.Rooms
+	startSlice := colony.StartRoom
+	fmt.Println("Startslice ", startSlice)
+	endSlice := colony.EndRoom
+	for _, roomAnd := range roomsAndCoord {
+		my = roomAnd.HouseAndCoordinates
+
+		foundstartkey, found := findKeyForSlice(my, startSlice)
+		if found {
+			fmt.Println("This is the start key ", foundstartkey)
+			startkey = foundstartkey
+		} else {
+			fmt.Println("No sart key found")
+		}
+	}
+	fmt.Println("START KEY ", startkey)
+
+	endkey, found := findKeyForSlice(my, endSlice)
+	if found {
+		fmt.Println("This is the end key ", endkey)
+	} else {
+		fmt.Println("No end key found")
+	}
+
+
+	shortestPath := utils.BfsShortestPath(startkey, endkey, roomAndLinks)
+
+	if shortestPath != nil {
+		fmt.Printf("Shortest path from %s to %s: %v\n", startkey, endkey, shortestPath)
+	} else {
+		fmt.Printf("No path found from %s to %s\n", startkey, endkey)
+	}
 }
