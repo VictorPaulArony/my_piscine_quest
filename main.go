@@ -67,28 +67,36 @@ func main() {
 	var endkey string
 	roomsAndCoord := colony.Rooms
 	startSlice := colony.StartRoom
-	fmt.Println("Startslice ", startSlice)
 	endSlice := colony.EndRoom
+
+	// Finding the starting point for the BFS
 	for _, roomAnd := range roomsAndCoord {
 		my = roomAnd.HouseAndCoordinates
 
 		foundstartkey, found := findKeyForSlice(my, startSlice)
 		if found {
-			fmt.Println("This is the start key ", foundstartkey)
+			fmt.Println("START KEY ", foundstartkey)
 			startkey = foundstartkey
+			break
 		} else {
-			fmt.Println("No sart key found")
+			// fmt.Println("no start key")
+			continue
 		}
 	}
-	fmt.Println("START KEY ", startkey)
 
-	endkey, found := findKeyForSlice(my, endSlice)
-	if found {
-		fmt.Println("This is the end key ", endkey)
-	} else {
-		fmt.Println("No end key found")
+	// Finding the ending place for the BFS
+	for _, roomAnd := range roomsAndCoord{
+		my = roomAnd.HouseAndCoordinates
+		foundendkey, found := findKeyForSlice(my, endSlice)
+		if found {
+			fmt.Println("END KEY ", foundendkey)
+			endkey = foundendkey
+			break
+		} else {
+			// fmt.Println("No end key")
+			continue
+		}
 	}
-
 
 	shortestPath := utils.BfsShortestPath(startkey, endkey, roomAndLinks)
 
