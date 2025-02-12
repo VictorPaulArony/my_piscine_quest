@@ -20,9 +20,9 @@ func FileReader(path string) *models.Colony {
 
 	// Starting and ending coordinates
 	// var startCoord []int
-	var start string
+	var start models.Room
 	// var endCoord []int
-	var end string
+	var end models.Room
 
 	file, err := os.Open(path)
 	if err != nil {

@@ -49,4 +49,6 @@ func main() {
 	for k, v := range roomAndConnections{
 		fmt.Printf("%s connected to %v\n", k, v)
 	}
+
+	colony.Bfs()
 }
