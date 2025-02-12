@@ -3,11 +3,12 @@ package main
 import (
 	"bufio"
 	"fmt"
-	combinations "lemin/PathCombinations"
-	"lemin/models"
 	"os"
 	"strconv"
 	"strings"
+
+	combinations "lemin/PathCombinations"
+	"lemin/models"
 )
 
 func main() {
@@ -30,11 +31,11 @@ func main() {
 	defer file.Close()
 
 	var colony models.Colony
-	var startRoom, endRoom, antCount int
-	var connectionFrom, connectionTo, roomPosition, xCoordinate, yCoordinate int
-	var isEnd bool
+	var startRoom, endRoom string
+	var connectionFrom, connectionTo, roomPosition string
+	var xCoordinate, yCoordinate,  antCount int
 
-	colony.Rooms = make(map[int]*models.Room)
+	colony.Rooms = make(map[string]*models.Room)
 	scanner := bufio.NewScanner(file)
 
 	var fileContent [][]string
@@ -49,16 +50,16 @@ func main() {
 			if strings.Contains(lineContent, "##start") {
 				fileContent = append(fileContent, []string{"start"})
 			} else if strings.Contains(lineContent, "##end") {
-				isEnd = true
+				fileContent = append(fileContent, []string{"end"})
 			} else {
 				continue
 			}
 		} else if strings.Contains(lineContent, " ") {
 			roomDetails := strings.Split(lineContent, " ")
 			fileContent = append(fileContent, roomDetails)
-			roomPosition, _ = strconv.Atoi(roomDetails[0])
-			xCoordinate, _ = strconv.Atoi(roomDetails[1])
-			yCoordinate, _ = strconv.Atoi(roomDetails[2])
+			roomPosition=roomDetails[0]
+			xCoordinate,_=strconv.Atoi(roomDetails[1])
+			yCoordinate,_=strconv.Atoi(roomDetails[2])
 
 			room = models.Room{
 				RoomNumber: roomPosition,
@@ -70,8 +71,8 @@ func main() {
 
 			connectionFromTo := strings.Split(lineContent, "-")
 
-			connectionFrom, _ = strconv.Atoi(connectionFromTo[0])
-			connectionTo, _ = strconv.Atoi(connectionFromTo[1])
+			connectionFrom = connectionFromTo[0]
+			connectionTo = connectionFromTo[1]
 
 			if _, exist1 := colony.Rooms[connectionFrom]; exist1 {
 				colony.Rooms[connectionFrom].Connection = append(colony.Rooms[connectionFrom].Connection, connectionTo)
@@ -83,25 +84,21 @@ func main() {
 			antCount, _ = strconv.Atoi(lineContent)
 		}
 
-		_, exists1 := colony.Rooms[endRoom]
-		if exists1 && isEnd {
-			colony.End = &room
-			isEnd = false
+		for i := 0; i < len(fileContent)-1; i++ {
+			if fileContent[i][0] == "end" {
+				endRoom=fileContent[i+1][0]
+				colony.End = colony.Rooms[endRoom]
+				break
+			}
 		}
-
 		colony.NumAnts = antCount
 	}
-	startRoom, _ = strconv.Atoi(fileContent[1][0])
+	startRoom = fileContent[1][0]
 	colony.Start = colony.Rooms[startRoom]
 
-	// for _,rooms:=range colony.Rooms{
-	// 	fmt.Println(rooms)
-
-	// }
 
 	bfsValidPaths := colony.Bfs()
-	//dfsValidPaths:=colony.Dfs()
-	antPaths :=combinations.FindCombinations(bfsValidPaths)
+	// dfsValidPaths:=colony.Dfs()
+	antPaths := combinations.FindCombinations(bfsValidPaths)
 	fmt.Println(antPaths)
-
 }

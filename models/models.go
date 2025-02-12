@@ -3,27 +3,27 @@ package models
 import "fmt"
 
 type Room struct {
-	RoomNumber int
+	RoomNumber string
 	Coordinate []int
-	Connection []int
+	Connection []string
 }
 type Colony struct {
 	NumAnts int
-	Rooms   map[int]*Room
+	Rooms   map[string]*Room
 	Start   *Room
 	End     *Room
 }
 
-func (c *Colony) Bfs() [][]int {
-	toBeVisited := [][]int{}
-	validPaths := [][]int{}
+func (c *Colony) Bfs() [][]string{
+	toBeVisited := [][]string{}
+	validPaths := [][]string{}
 
 	startPtr := c.Start
 	endPtr := c.End
 	startValue := *startPtr
 	targetValue := *endPtr
 
-	startRoom := []int{startValue.RoomNumber}
+	startRoom := []string{startValue.RoomNumber}
 	endRoom := targetValue.RoomNumber
 
 	toBeVisited = append(toBeVisited, startRoom)
@@ -34,21 +34,24 @@ func (c *Colony) Bfs() [][]int {
 		toBeVisited = toBeVisited[1:]
 
 		if currentRoom[len(currentRoom)-1] == endRoom {
-			validPaths = append(validPaths, currentRoom)
-			continue
 
+			validPaths = append(validPaths, currentRoom)
+
+			continue
 		}
-		hasBeenVisited := make(map[int]bool)
+		hasBeenVisited := make(map[string]bool)
+
 		for _, room := range currentRoom {
 			hasBeenVisited[room] = true
 		}
 		if _, exists := c.Rooms[currentRoom[len(currentRoom)-1]]; exists {
 			for _, connection := range c.Rooms[currentRoom[len(currentRoom)-1]].Connection {
-				matrix := []int{}
+				matrix := []string{}
 				matrix = append(matrix, currentRoom...)
 				if !hasBeenVisited[connection] {
 					matrix = append(matrix, connection)
 					toBeVisited = append(toBeVisited, matrix)
+
 				}
 			}
 		}
@@ -56,16 +59,16 @@ func (c *Colony) Bfs() [][]int {
 	return validPaths
 }
 
-func (c *Colony) Dfs() [][]int {
-	toBeVisited := [][]int{}
-	validPaths := [][]int{}
+func (c *Colony) Dfs() [][]string{
+	toBeVisited := [][]string{}
+	validPaths := [][]string{}
 
 	startPtr := c.Start
 	endPtr := c.End
 	startValue := *startPtr
 	targetValue := *endPtr
 
-	startRoom := []int{startValue.RoomNumber}
+	startRoom := []string{startValue.RoomNumber}
 	endRoom := targetValue.RoomNumber
 
 	toBeVisited = append(toBeVisited, startRoom)
@@ -80,13 +83,13 @@ func (c *Colony) Dfs() [][]int {
 			continue
 
 		}
-		hasBeenVisited := make(map[int]bool)
+		hasBeenVisited := make(map[string]bool)
 		for _, room := range currentRoom {
 			hasBeenVisited[room] = true
 		}
 		if _, exists := c.Rooms[currentRoom[len(currentRoom)-1]]; exists {
 			for _, connection := range c.Rooms[currentRoom[len(currentRoom)-1]].Connection {
-				matrix := []int{}
+				matrix := []string{}
 				matrix = append(matrix, currentRoom...)
 				if !hasBeenVisited[connection] {
 					matrix = append(matrix, connection)

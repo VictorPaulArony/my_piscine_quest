@@ -1,29 +1,31 @@
 package combinations
 
 import (
-	"strconv"
 	"strings"
 )
 
-func isInside(pathSearched []int, rooms []int) bool {
+func isInside(pathSearched []string, rooms []string) bool {
 	paths := ""
 	roomsString := ""
 	for _, pathValue := range pathSearched {
-		paths += strconv.Itoa(pathValue)
+		paths += pathValue
 	}
 	for _, room := range rooms {
-		roomsString += strconv.Itoa(room)
+		roomsString += room
 	}
 
 	return strings.ContainsAny(paths, roomsString)
 }
 
 var (
-	pathCombinations     [][]int
-	possibleCombinations [][][]int
+	pathCombinations     [][]string
+	possibleCombinations [][][]string
 )
 
-func FindCombinations(paths [][]int) [][]int {
+func FindCombinations(paths [][]string) [][]string {
+	if len(paths) == 1 {
+		return paths
+	}
 	for i := 0; i < len(paths)-1; i++ {
 		pathCombinations = nil
 		pathCombinations = append(pathCombinations, paths[i])
