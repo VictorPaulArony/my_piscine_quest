@@ -60,17 +60,12 @@ func FileReader(path string) *models.Colony {
 		if isStart {
 			startRoom := MapRooms(text)
 			isStart = false
-			// Get the room which will be the start
-			for k := range startRoom.HouseAndCoordinates {
-				start = k
-			}
+			start = *startRoom
+			
 		} else if isEnd {
 			endRoom := MapRooms(text)
 			isEnd = false
-			// Get the room which will be the end
-			for k:= range endRoom.HouseAndCoordinates {
-				end = k
-			}
+			end = *endRoom
 		}
 		// Capture the rooms
 		singleRoom := MapRooms(text)

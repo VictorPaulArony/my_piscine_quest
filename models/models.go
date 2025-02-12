@@ -2,10 +2,10 @@ package models
 
 // space for the structs to be written
 type Colony struct {
-	NoOfAnts  int
-	Rooms     []*Room
+	NoOfAnts int
+	Rooms []*Room
 	StartRoom Room
-	EndRoom   Room
+	EndRoom Room
 }
 
 type Room struct {
