@@ -105,4 +105,12 @@ func main() {
 	} else {
 		fmt.Printf("No path found from %s to %s\n", startkey, endkey)
 	}
+
+	fmt.Println("------")
+	visited := make(map[string]bool)
+	listOfPaths := utils.Dfs(startkey,endkey, roomAndLinks, visited, []string{})
+	fmt.Println("This is the list of possible paths")
+	for _,path := range listOfPaths{
+		fmt.Println(path)
+	}
 }
