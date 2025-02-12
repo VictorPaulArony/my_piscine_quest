@@ -1,6 +1,6 @@
 package utils
 
-// FilterPath filters out paths and returns the best solution that doesn't contain conflicts
+// function that filters paths and returns the best solution without any conflicts
 func FilterPath(AllPaths [][]string, start string, end string) [][]string {
 	BestSolution := [][]string{}
 
@@ -14,18 +14,17 @@ func FilterPath(AllPaths [][]string, start string, end string) [][]string {
 			}
 		}
 
-		// Update the best solution if the current one is longer (better)
+		// Update the best solution if the current one is found to be longer 
 		if len(CurrentSolution) > len(BestSolution) {
 			BestSolution = CurrentSolution
 		}
 	}
-	// fmt.Printf("%q \n", BestSolution)
+	
 	// Return the best solution found
 	return BestSolution
 }
 
-// CheckPath checks if the current path can be added to the existing path
-// without any conflicts, ensuring no repeated rooms except for start and end.
+// CheckPath checks if the current path can be added to the existing path without repeating the rooms to avoid resourse queue(waiting)
 func CheckPath(path [][]string, current []string, start string, end string) bool {
 	// Iterate through the current path to check for conflicts
 	for i := 0; i < len(path); i++ {
@@ -38,11 +37,10 @@ func CheckPath(path [][]string, current []string, start string, end string) bool
 			// Check if the room already exists in the current path (conflict)
 			for _, curRoom := range current {
 				if curRoom == room && curRoom != start && curRoom != end {
-					return false // Conflict found, return false
+					return false 
 				}
 			}
 		}
 	}
-	// No conflicts found, return true
 	return true
 }
