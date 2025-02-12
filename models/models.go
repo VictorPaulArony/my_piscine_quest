@@ -4,13 +4,13 @@ package models
 type Colony struct {
 	NoOfAnts int
 	Rooms []*Room
-	StartRoom Room
-	EndRoom Room
+	StartRoom string
+	EndRoom string
 }
 
 type Room struct{
 	Name string // A room identifier
 	HouseAndCoordinates map[string][]int // A house and the coordinates
 	Link [][]string // This stores connections of room to another room
-	RoomAndLinks map[string][]string
+	RoomAndConnectedLinks map[string][]string
 }
