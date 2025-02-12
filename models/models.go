@@ -4,8 +4,8 @@ package models
 type Colony struct {
 	NoOfAnts int
 	Rooms []*Room
-	StartRoom string
-	EndRoom string
+	StartRoom Room
+	EndRoom Room
 }
 
 type Room struct{
