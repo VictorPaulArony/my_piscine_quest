@@ -1,7 +1,6 @@
 package combinations
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 )
@@ -16,16 +15,15 @@ func isInside(pathSearched []int, rooms []int) bool {
 		roomsString += strconv.Itoa(room)
 	}
 
-	if strings.ContainsAny(paths, roomsString) {
-		return true
-	}
-	return false
+	return strings.ContainsAny(paths, roomsString)
 }
 
-var pathCombinations [][]int
-var possibleCombinations [][][]int
+var (
+	pathCombinations     [][]int
+	possibleCombinations [][][]int
+)
 
-func FindCombinations(paths [][]int) [][][]int {
+func FindCombinations(paths [][]int) [][]int {
 	for i := 0; i < len(paths)-1; i++ {
 		pathCombinations = nil
 		pathCombinations = append(pathCombinations, paths[i])
@@ -34,12 +32,12 @@ func FindCombinations(paths [][]int) [][][]int {
 			pathSearched := paths[j]
 			if isInside(pathSearched, uniqueValues) {
 				continue
-			} 
-				pathCombinations = append(pathCombinations, pathSearched)
+			}
+			pathCombinations = append(pathCombinations, pathSearched)
+			j++
 		}
-		fmt.Println(pathCombinations)
 		possibleCombinations = append(possibleCombinations, pathCombinations)
 
 	}
-	return possibleCombinations
+	return possibleCombinations[0]
 }
