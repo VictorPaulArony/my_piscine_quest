@@ -3,11 +3,11 @@ package main
 import (
 	"bufio"
 	"fmt"
+	combinations "lemin/PathCombinations"
+	"lemin/models"
 	"os"
 	"strconv"
 	"strings"
-
-	"lemin/models"
 )
 
 func main() {
@@ -85,7 +85,7 @@ func main() {
 
 		_, exists1 := colony.Rooms[endRoom]
 		if exists1 && isEnd {
-			colony.End =  &room
+			colony.End = &room
 			isEnd = false
 		}
 
@@ -98,7 +98,10 @@ func main() {
 	// 	fmt.Println(rooms)
 
 	// }
-	
-	fmt.Println(colony.Bfs())
-	fmt.Println(colony.Dfs())
+
+	bfsValidPaths := colony.Bfs()
+	//dfsValidPaths:=colony.Dfs()
+	antPaths :=combinations.FindCombinations(bfsValidPaths)
+	fmt.Println(antPaths)
+
 }
