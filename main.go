@@ -40,15 +40,21 @@ func main() {
 		break
 	}
 
-	var roomAndConnections = map[string][]string{}
-	for _, room := range colony.Rooms{
-		for k, v := range room.RoomAndConnectedLinks{
+	roomAndConnections := map[string][]string{}
+	for _, room := range colony.Rooms {
+		for k, v := range room.RoomAndConnectedLinks {
 			roomAndConnections[k] = v
 		}
 	}
-	for k, v := range roomAndConnections{
-		fmt.Printf("%s connected to %v\n", k, v)
-	}
+	// for k, v := range roomAndConnections{
+	// 	fmt.Printf("%s connected to %v\n", k, v)
+	// }
 
-	colony.Bfs()
+	startRoom := colony.StartRoom
+	endRoom := colony.EndRoom
+
+	allPath := colony.Bfs()
+
+	bestPaths := utils.FilterPath(allPath, startRoom.Name, endRoom.Name)
+	fmt.Println(bestPaths)
 }
