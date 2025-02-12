@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	combinations "lem-in/PossibleCombinations"
 	"lem-in/utils"
 )
 
@@ -50,5 +51,7 @@ func main() {
 		fmt.Printf("%s connected to %v\n", k, v)
 	}
 
-	colony.Bfs()
+	possiblePaths:=colony.Bfs()
+	optimalPath:=combinations.FindCombinations(possiblePaths)
+	fmt.Println(optimalPath)
 }
