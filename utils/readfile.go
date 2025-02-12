@@ -13,14 +13,16 @@ import (
 // reading the .txt file
 
 func FileReader(path string) *models.Colony {
-	var rooms []*models.Room
-	var allLinks [][]string
-	var roomAndLinks map[string][]string
-	var noOfAnts int
+	var rooms []*models.Room // Holds all the rooms and their properties
+	var allLinks [][]string // This holds all the links that are present in the data
+	var roomAndConnectedLinks map[string][]string //Holds room and their connections
+	var noOfAnts int 
 
 	// Starting and ending coordinates
-	var startCoord []int
-	var endCoord []int
+	// var startCoord []int
+	var start string
+	// var endCoord []int
+	var end string
 
 	file, err := os.Open(path)
 	if err != nil {
@@ -58,16 +60,16 @@ func FileReader(path string) *models.Colony {
 		if isStart {
 			startRoom := MapRooms(text)
 			isStart = false
-			// Add only the coordinates in the colony
-			for _, v := range startRoom.HouseAndCoordinates {
-				startCoord = v
+			// Get the room which will be the start
+			for k := range startRoom.HouseAndCoordinates {
+				start = k
 			}
 		} else if isEnd {
 			endRoom := MapRooms(text)
 			isEnd = false
-			// Add only the coordinates in the colony
-			for _, v := range endRoom.HouseAndCoordinates {
-				endCoord = v
+			// Get the room which will be the end
+			for k:= range endRoom.HouseAndCoordinates {
+				end = k
 			}
 		}
 		// Capture the rooms
@@ -82,18 +84,20 @@ func FileReader(path string) *models.Colony {
 		}
 	}
 
-	roomAndLinks = FindRoomAndLinks(allLinks)
+	roomAndConnectedLinks = FindRoomAndLinks(allLinks) // This holds all the rooms and their connected links
 
 	// Updating the colony struct
 	colony := &models.Colony{
 		NoOfAnts:     noOfAnts,
 		Rooms:        rooms,
-		Link:         allLinks,
-		StartRoom:    startCoord,
-		EndRoom:      endCoord,
-		RoomAndLinks: roomAndLinks,
+		StartRoom:    start,
+		EndRoom:      end,
 	}
-
+	// Populate the rooms struct
+	for _, room := range colony.Rooms{
+		room.Link = allLinks
+		room.RoomAndConnectedLinks = roomAndConnectedLinks
+	}
 	return colony
 }
 
