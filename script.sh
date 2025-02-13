@@ -1,1 +1,1 @@
-go run main.go test0.tx
+go run main.go test0.txt

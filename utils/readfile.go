@@ -168,15 +168,15 @@ func FileReader(fileNmae string) *models.Colony {
 		return nil
 	}
 	if countStart != 1 {
-		fmt.Println("ERROR: invalid data format, no start room")
+		fmt.Println("ERROR: invalid data format or no start room")
 		return nil
 	}
 	if countEnd != 1 {
-		fmt.Println("ERROR: invalid data format, no end room")
+		fmt.Println("ERROR: invalid data format or no end room")
 		return nil
 	}
 	if len(seenLinks) == 0 {
-		fmt.Println("ERROR: invalid data format, no links found")
+		fmt.Println("ERROR: invalid data format or no links found")
 		return nil
 	}
 
